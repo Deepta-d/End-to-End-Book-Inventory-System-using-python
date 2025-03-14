@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Book Inventory</title>
+    <style>
+        /* General Styles */
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f9f9f9;
+            color: #333;
+            line-height: 1.6;
+        }
+
+        header {
+            background-color: #4CAF50;
+            color: white;
+            padding: 10px 20px;
+            text-align: center;
+            box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        main {
+            max-width: 800px;
+            margin: 20px auto;
+            padding: 20px;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        h1, h2 {
+            color: #4CAF50;
+            margin-bottom: 10px;
+        }
+
+        form {
+            margin-bottom: 20px;
+            padding: 10px;
+            background: #f4f4f4;
+            border-radius: 5px;
+        }
+
+        label {
+            display: block;
+            margin: 10px 0 5px;
+            font-weight: bold;
+        }
+
+        input, button {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 16px;
+        }
+
+        input:focus {
+            outline: none;
+            border-color: #4CAF50;
+            box-shadow: 0 0 5px rgba(76, 175, 80, 0.5);
+        }
+
+        button {
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        button:hover {
+            background-color: #45a049;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+        }
+
+        th, td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+
+        th {
+            background-color: #4CAF50;
+            color: white;
+        }
+
+        tr:nth-child(even) {
+            background-color: #f4f4f4;
+        }
+
+        tr:hover {
+            background-color: #f1f1f1;
+        }
+
+        #exportSection {
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        #exportSection button {
+            width: auto;
+            display: inline-block;
+            margin: 0 5px;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            input, button {
+                width: 100%;
+            }
+
+            table {
+                font-size: 14px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Book Inventory System</h1>
+    </header>
+
+    <main>
+        <h2>Add New Book</h2>
+        <form id="addBookForm">
+<!--             <label for="entry id">Entry id:</label> -->
+<!--             <input type="text" name="entry id" id="entry id" placeholder="Enter entry id" required> -->
+            
+            <label for="title">Title:</label>
+            <input type="text" name="title" id="title" placeholder="Enter book title" required>
+
+            <label for="author">Author:</label>
+            <input type="text" name="author" id="author" placeholder="Enter author name" required>
+
+            <label for="genre">Genre:</label>
+            <input type="text" name="genre" id="genre" placeholder="Enter genre" required>
+
+            <label for="publication_date">Publication Date:</label>
+            <input type="date" name="publication_date" id="publication_date">
+
+            <label for="isbn">ISBN:</label>
+            <input type="text" name="isbn" id="isbn" placeholder="Enter ISBN" required>
+
+            <button type="submit">Add Book</button>
+        </form>
+
+        <h2>Filter Books</h2>
+        <form id="filterBooksForm">
+            <label for="filterTitle">Title:</label>
+            <input type="text" name="title" id="filterTitle" placeholder="Search by title">
+
+            <label for="filterAuthor">Author:</label>
+            <input type="text" name="author" id="filterAuthor" placeholder="Search by author">
+
+            <label for="filterGenre">Genre:</label>
+            <input type="text" name="genre" id="filterGenre" placeholder="Search by genre">
+
+            <label for="filterDateFrom">Publication Date From:</label>
+            <input type="date" name="date_from" id="filterDateFrom">
+
+            <label for="filterDateTo">To:</label>
+            <input type="date" name="date_to" id="filterDateTo">
+
+            <button type="submit">Filter</button>
+        </form>
+
+        <h2>Book List</h2>
+        <table id="booksTable">
+            <thead>
+                <tr>
+                    <th>Title</th>
+                    <th>Author</th>
+                    <th>Genre</th>
+                    <th>Publication Date</th>
+                    <th>ISBN</th>
+                </tr>
+            </thead>
+            <tbody>
+                <!-- Dynamic rows will go here -->
+            </tbody>
+        </table>
+        <div id="exportSection">
+            <h2>Export Data</h2>
+            <button id="exportCSV">Export to CSV</button>
+            <button id="exportJSON">Export to JSON</button>
+        </div>
+    </main>
+
+    <script>
+        const API_URL = "http://127.0.0.1:5000";
+
+    // Add book
+    document.getElementById("addBookForm").addEventListener("submit", async (e) => {
+        e.preventDefault();
+        const formData = new FormData(e.target);
+
+        const book = {
+            title: formData.get("title"),
+            author: formData.get("author"),
+            genre: formData.get("genre"),
+            publication_date: formData.get("publication_date"),
+            isbn: formData.get("isbn")
+        };
+
+        const response = await fetch(`${API_URL}/add-book`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(book)
+        });
+
+        if (response.ok) {
+            alert("Book added successfully!");
+            e.target.reset();
+        } else {
+            const error = await response.json();
+            alert("Error: " + error.error);
+        }
+    });
+
+    // Filter books
+    document.getElementById("filterBooksForm").addEventListener("submit", async (e) => {
+        e.preventDefault();
+        const formData = new FormData(e.target);
+
+        const params = new URLSearchParams({
+            title: formData.get("title") || "",
+            author: formData.get("author") || "",
+            genre: formData.get("genre") || "",
+            date_from: formData.get("date_from") || "",
+            date_to: formData.get("date_to") || ""
+        });
+
+        const response = await fetch(`${API_URL}/filter-books?${params}`);
+        const books = await response.json();
+
+        const tbody = document.querySelector("#booksTable tbody");
+        tbody.innerHTML = ""; // Clear existing rows
+
+        books.forEach(book => {
+            const row = document.createElement("tr");
+            row.innerHTML = `
+                <td>${book.title}</td>
+                <td>${book.author}</td>
+                <td>${book.genre}</td>
+                <td>${book.publication_date || "N/A"}</td>
+                <td>${book.isbn}</td>
+            `;
+            tbody.appendChild(row);
+        });
+    });
+   // Fetch books
+document.getElementById("filterBooksForm").addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const formData = new FormData(e.target);
+
+    const filters = {
+        title: formData.get("title") || null,
+        author: formData.get("author") || null,
+        genre: formData.get("genre") || null,
+        date_from: formData.get("date_from") || null,
+        date_to: formData.get("date_to") || null
+    };
+
+    const queryString = new URLSearchParams(filters).toString();
+
+    const response = await fetch(`${API_URL}/get-books?${queryString}`, {
+        method: "GET",
+        headers: { "Content-Type": "application/json" }
+    });
+
+    if (response.ok) {
+        const books = await response.json();
+        const booksTableBody = document.querySelector("#booksTable tbody");
+        booksTableBody.innerHTML = ""; // Clear existing rows
+
+        if (books.length > 0) {
+            books.forEach((book) => {
+                const row = document.createElement("tr");
+                row.innerHTML = `
+                    <td>${book.title}</td>
+                    <td>${book.author}</td>
+                    <td>${book.genre}</td>
+                    <td>${book.publication_date ? book.publication_date : "N/A"}</td>
+                    <td>${book.isbn}</td>
+                `;
+                booksTableBody.appendChild(row);
+            });
+        } else {
+            booksTableBody.innerHTML = `<tr><td colspan="5" style="text-align: center;">No books found.</td></tr>`;
+        }
+    } else {
+        const error = await response.json();
+        alert("Error fetching books: " + error.error);
+    }
+});
+
+
+    // Export data
+    document.getElementById("exportCSV").addEventListener("click", async () => {
+        const response = await fetch(`${API_URL}/export-csv`);
+        const message = await response.json();
+        alert(message.message);
+    });
+
+    document.getElementById("exportJSON").addEventListener("click", async () => {
+        const response = await fetch(`${API_URL}/export-json`);
+        const message = await response.json();
+        alert(message.message);
+    });
+    </script>
+</body>
+</html>
